@@ -3,14 +3,13 @@
 MYSQL *mysql = 0;
 int connect_db(const char* host, int nPort, const char* szDatabase, const char* user, const char* passwd)
 {
-    //printf("connect_db ..... \n");
+    printf("connect_db ..... \n");
 
     mysql = mysql_init(NULL);
 
     if (mysql == 0)
     {
         fprintf(stderr, "%s\n", mysql_error(mysql));
-        //exit(2000);
         return -1;
     }
 
@@ -21,7 +20,7 @@ int connect_db(const char* host, int nPort, const char* szDatabase, const char* 
         return -1;
     }
 
-    //printf("OK!\n");
+    printf("connect mysql sucess!\n");
     return (0);
 }
 
@@ -30,5 +29,5 @@ void disconnect_db(void)
     if (mysql)
         mysql_close(mysql);
 
-    //printf("\ndisconnected_db\n");
+    printf("disconnected_db\n");
 }
