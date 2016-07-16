@@ -17,10 +17,11 @@ int main(int argc, char *argv[])
   char mysql_user_pass[512];
   char server_ip[128];
   char host_name[128];
+  int time_interval;
 
-  if (argc<8)
+  if (argc<9)
   {
-     printf("<path><mysql db name><mysql server ip><mysql srever port><mysql user name><mysql password><zbbix hostname in zabbix_agent.conf><server ip>\n");
+     printf("<path><mysql db name><mysql server ip><mysql srever port><mysql user name><mysql password><zbbix hostname in zabbix_agent.conf><server ip><send time interval(sencond)>\n");
      return -1;
   }
 
@@ -31,15 +32,15 @@ int main(int argc, char *argv[])
   strcpy(mysql_user_pass, argv[5]);
   strcpy(host_name, argv[6]);
   strcpy(server_ip, argv[7]);
+  time_interval = atoi(argv[8]);
   
-
   /*strcpy(mysql_db, "asdb");
   strcpy(mysql_ip, "192.168.1.253");
   mysql_port = atoi("3306");
   strcpy(mysql_user_name, "root");
   strcpy(mysql_user_pass, "");*/
 
-  printf("%s %s %d %s %s %s", mysql_db, mysql_ip, mysql_port, mysql_user_name, mysql_user_pass, host_name);
+  printf("%s %s %d %s %s %s %d", mysql_db, mysql_ip, mysql_port, mysql_user_name, mysql_user_pass, host_name, time_interval);
 
   if (0!=connect_db(mysql_ip, mysql_port, mysql_db, mysql_user_name, mysql_user_pass))
   {
@@ -50,11 +51,7 @@ int main(int argc, char *argv[])
 
   for (;;)
   {
-//    sprintf(data, "zabbix_sender   -z localhost   -s \"Zabbix server\"   -k \"test.timestamp\"  -o %d\n", random()%100);  
-   /* sprintf(data, "zabbix_sender   -z localhost   -s \"Zabbix server\"   -k \"htrd.key.task0\"  -o %d\n", count0);
-    printf("%s", data);
-    int ret = system(data);  //调用shell命令 ls -l
-    printf("ret = %d\n",ret);*/
+    //sprintf(data, "zabbix_sender   -z localhost   -s \"Zabbix server\"   -k \"test.timestamp\"  -o %d\n", random()%100);
 
     printf("\n-----------------------------\n");
     int count0 = query_count((char**)(&out), "SELECT count(1) from k_scheduler WHERE State=0;");
@@ -72,7 +69,7 @@ int main(int argc, char *argv[])
     int count4 = query_count((char**)(&out), "SELECT count(1) from k_scheduler WHERE State=4;");
     zabbix_send(count4, "htrd.key.task4", server_ip, host_name);
     
-    sleep(5);
+    sleep(time_interval);
   }
   disconnect_db();
   return 0;
