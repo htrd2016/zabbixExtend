@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "util.h"
 
 MYSQL *mysql = 0;
@@ -30,4 +31,15 @@ void disconnect_db(void)
         mysql_close(mysql);
 
     printf("disconnected_db\n");
+}
+
+int get_current_day_str(char **out)
+{
+  time_t timep;
+  struct tm *p;
+  time(&timep); /*获得time_t结构的时间，UTC时间*/
+  p = gmtime(&timep); /*转换为struct tm结构的UTC时间*/
+  sprintf((char*)(*out), "%d-%02d-%02d", 1900 + p->tm_year, 1 + p->tm_mon, p->tm_mday);
+  printf("%s", *out);
+  return 0;  
 }
