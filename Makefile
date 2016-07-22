@@ -6,7 +6,7 @@ INCLUDES= -I./mysql-connector-c-6.0.2-linux-rhel5
 TARGET=DataToJson
 
 DataToJson: util.o
-	$(CC) -o $@ $(CFLAGS) main.c util.o $(LIBS)
+	$(CC) -o $@ $(INCLUDES) $(CFLAGS) main.c util.o $(LIBS)
 
 util.o:	util.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c util.c
