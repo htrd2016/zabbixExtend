@@ -39,7 +39,9 @@ int get_current_day_str(char **out)
   struct tm *p;
   time(&timep); /*获得time_t结构的时间，UTC时间*/
   p = gmtime(&timep); /*转换为struct tm结构的UTC时间*/
-  sprintf((char*)(*out), "%d-%02d-%02d", 1900 + p->tm_year, 1 + p->tm_mon, p->tm_mday);
+  //sprintf((char*)(*out), "%d-%02d-%02d", 1900 + p->tm_year, 1 + p->tm_mon, p->tm_mday);
+  sprintf((char*)(*out), "%d-%02d-%02d %02d:%02d:%02d", 1900 + p->tm_year, 1 + p->tm_mon, p->tm_mday,
+         p->tm_hour, p->tm_min, p->tm_sec);
   printf("%s", *out);
   return 0;  
 }

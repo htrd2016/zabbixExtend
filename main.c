@@ -4,8 +4,9 @@
 
 extern MYSQL *mysql;
 
-int zabbix_send(int count, char *key, char *server_ip, char *host_name);
-int query_count(char **data, char *sql);
+extern int zabbix_send(int count, char *key, char *server_ip, char *host_name);
+extern int query_count(char **data, char *sql);
+extern char *get_sql(int nIndex, char *current_day, char **out);
 
 int main(int argc, char *argv[])
 {
@@ -22,7 +23,9 @@ int main(int argc, char *argv[])
   char current_day[512];
   char *pcurrent_day = current_day;
   char sql[1024];
-
+  char *psql = sql;
+  int count = 0;
+ 
   if (argc<9)
   {
      printf("<path><mysql db name><mysql server ip><mysql srever port><mysql user name><mysql password><zbbix hostname in zabbix_agent.conf><server ip><send time interval(sencond)>\n");
@@ -46,38 +49,49 @@ int main(int argc, char *argv[])
             mysql_ip, mysql_port, mysql_user_name, mysql_db);
         return -1;
   }
+  get_current_day_str((char**)(&pcurrent_day));
 
   for (;;)
   {
-    get_current_day_str((char**)(&pcurrent_day));
     //sprintf(data, "zabbix_sender   -z localhost   -s \"Zabbix server\"   -k \"test.timestamp\"  -o %d\n", random()%100);
 
     printf("\n-----------------------------\n");
-    sprintf(sql, "SELECT count(1) from k_scheduler WHERE State=0 and FDate='%s';", current_day);
-    int count0 = query_count((char**)(&out), sql);
-    zabbix_send(count0, "htrd.key.task0", server_ip, host_name);
 
+    get_sql(0, current_day, &psql);
+    count = query_count((char**)(&out), psql);
+    zabbix_send(count, "htrd.key.task0", server_ip, host_name);
 
-    sprintf(sql, "SELECT count(1) from k_scheduler WHERE State=1 and FDate='%s';", current_day);
-    int count1 = query_count((char**)(&out), sql);
-    zabbix_send(count1,"htrd.key.task1", server_ip, host_name);
-
-    sprintf(sql, "SELECT count(1) from k_scheduler WHERE State=2 and FDate='%s';", current_day);
-    int count2 = query_count((char**)(&out), sql);
-    zabbix_send(count2,"htrd.key.task2", server_ip, host_name);
-
-    sprintf(sql, "SELECT count(1) from k_scheduler WHERE State=3 and FDate='%s';", current_day);
-    int count3 = query_count((char**)(&out), sql);
-    zabbix_send(count3, "htrd.key.task3", server_ip, host_name);
-  
-    sprintf(sql, "SELECT count(1) from k_scheduler WHERE State=4 and FDate='%s';", current_day);
-    int count4 = query_count((char**)(&out), sql);
-    zabbix_send(count4, "htrd.key.task4", server_ip, host_name);
+    get_sql(1, current_day, &psql);
+    count = query_count((char**)(&out), psql);
+    zabbix_send(count, "htrd.key.task1", server_ip, host_name);
+ 
+    get_sql(2, current_day, &psql);
+    count = query_count((char**)(&out), psql);
+    zabbix_send(count,"htrd.key.task2", server_ip, host_name);
+ 
+    get_sql(3, current_day, &psql);
+    count = query_count((char**)(&out), psql);
+    zabbix_send(count, "htrd.key.task3", server_ip, host_name);
+   
+    get_sql(4, current_day, &psql);
+    count = query_count((char**)(&out), psql);
+    zabbix_send(count, "htrd.key.task4", server_ip, host_name);
+ 
+    //sprintf(sql, "select count(*) from k_flowrecord where STime >= '%s';", current_day);
+    sprintf(sql, "SELECT COUNT(*) FROM k_flowrecord kf JOIN k_scheduler ks on kf.ID=ks.FlowRecordID where kf.STime >= '%s' AND ks.State in (1,2,4);",  current_day);
+    count = query_count((char**)(&out), sql);
+    zabbix_send(count, "htrd.key.task5", server_ip, host_name);
     
     sleep(time_interval);
   }
   disconnect_db();
   return 0;
+}
+
+char *get_sql(int nIndex, char *current_day, char **out)
+{
+  sprintf((*out), "SELECT count(*) from k_scheduler WHERE State=%d and CONCAT(FDate,' ',FTime)>='%s';", nIndex, current_day);
+  return *out;
 }
 
 int zabbix_send(int count, char *key, char *server_ip, char *host_name)
