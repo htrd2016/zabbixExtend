@@ -5,8 +5,11 @@ zabbixExtend是读取server端mysql数据库，查询server端未执行、执行
 1.进入mysqlInstaller目录执行sh ./installMySql.sh安装mysql库文件。
 
 2.以下命令写入run.sh文件
+
 export LD_LIBRARY_PATH=/usr/lib/:LD_LIBRARY_PATH
+
 ./zabbixExtend "db" "192.168.XXX.XXX" 3306 "root" "pass" "SERVER-OLD" "localhost" 120 "2016-07-29 17:30:00" > /dev/null 2>&1 &
+
 其中zabbixExtend是当前工程生成的可执行程序，db为要查询的数据库名，192.168.XXX.XXX为数据库所在的ip地址，3306为mysql端口号，root为mysql用户名，pass为mysql密码，SERVER-OLD为zabbix客户端主机名，localhost为zabbix-server地址，120为通过zabbix-sender发送数据的时间间隔，2016-07-29 17:30:00为查询的起始时间。
 
 3.zabbix-server 展示接收到的数据
